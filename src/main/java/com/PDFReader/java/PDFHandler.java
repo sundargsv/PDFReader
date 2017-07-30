@@ -1,9 +1,17 @@
 package com.PDFReader.java;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.logging.Logger;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.json.simple.JSONObject;
 
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
@@ -23,6 +31,7 @@ import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.TextRenderInfo;
 import com.itextpdf.text.pdf.PdfWriter;
 
+
 import java.io.IOException;
 
 public class PDFHandler {
@@ -38,9 +47,10 @@ public class PDFHandler {
 
 	/*
 	 * @param : Directory path
-	 * @param : Content
+	 * @Resolved : Response
 	 * */
-	public String getContent(String dirPath){
+	@SuppressWarnings("unchecked")
+	public String contentExtractor(String dirPath){
 		
 		String pageContent;
 		File dir = new File(dirPath);
@@ -71,37 +81,106 @@ public class PDFHandler {
 						for(int i = 1; i <= pages; i++) { 
 						  pageContent = 
 						  	PdfTextExtractor.getTextFromPage(pdfReader, i, strategy);
-						  System.out.println("Content on Page "
-						  		              + i + ": " + pageContent);
+						  //System.out.println("Content on Page "+ i + ": " + pageContent);
+						  
+						  /*
+						   * Send Json
+						   * BAN : "123456789"
+						   * billAmount : "100.50$"
+						   * query : "why my bill amount is 5.50 $ extra ?"
+						   * obj.toJSONString()
+						   *  */
+						  
+						  String arr[] = pageContent.split(" : ", 10);
+						  JSONObject obj = new JSONObject();
+						  obj.put("billingAccountNumber", arr[1]);
+						  obj.put("billAmount", "100.50");
+						  obj.put("query", "why my bill amount is 5.50 $ extra");
+						  
+					
+						  @SuppressWarnings("unused")
+						String res = PDFHandler.requestHandler(obj);
+						  
 					      }
-					 
-					      //Close the PdfReader.
-					      pdfReader.close();
+					
+				
+				   pdfReader.close();
 				 } catch (IOException e) {
+					 LOGGER.warning("IO 	EXCEPTION : "+e.getMessage());
 					 e.printStackTrace();
 				 }catch (Exception e) {
+					 LOGGER.severe("EXCEPTION : "+e.getMessage());
 					 e.printStackTrace();
 				 }
 			 }
 		
 		}
 		
-		return "No of files :";
+		return "Query Responded !!!";
 			
 	}
 	
+	/*
+	 * @param : JSONObject (BAN, Bill Amount, Query)
+	 * @Resolved : Response
+	 * */
+	
+	public static String requestHandler(JSONObject jsonObject) {
+		String output = "";
+		 try {
+
+				URL url = new URL("http://localhost:8080/respondQuery");
+				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+				conn.setDoOutput(true);
+				conn.setRequestMethod("POST");
+				conn.setRequestProperty("Content-Type", "application/json");
+
+				OutputStream os = conn.getOutputStream();
+				os.write(jsonObject.toString().getBytes());
+				os.flush();
+
+				if (conn.getResponseCode() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+					throw new RuntimeException("Failed : HTTP error code : "
+						+ conn.getResponseCode());
+				}
+
+				BufferedReader br = new BufferedReader(new InputStreamReader(
+						(conn.getInputStream())));
+
+				
+				System.out.println("Please wait for a while, we are trying to respond you soon .... \n");
+				while ((output = br.readLine()) != null) {
+					System.out.println(output);
+				}
+				conn.disconnect();
+
+			  } catch (MalformedURLException e) {
+				 LOGGER.warning("MAL FORMED URL EXCEPTION : "+e.getMessage()); 
+				 e.printStackTrace();
+
+			  } catch (IOException e) {
+				LOGGER.warning("IO EXCEPTION : "+e.getMessage());
+				e.printStackTrace();
+
+			 }
+		 
+		 	return output;
+	}
+	
+	/*
+	 * @param : N/ A
+	 * @Resolved : Written Successfully (True/ False)
+	 * */
 	
 	public boolean pdfWriter(){
 		Document document = new Document();
 		try {
 
-			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(new File("/home/sunder/pdfs/itext.pdf")));
-
-            //open
+			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(new File("/Users/mopus/Documents/pdfs/itext.pdf")));
             document.open();
 
             Paragraph p = new Paragraph();
-            p.add("Account No : 9688265787");
+            p.add("Account_Number : 9688265787");
             p.setAlignment(Element.ALIGN_CENTER);
 
             PdfContentByte canvas = writer.getDirectContent();
@@ -114,15 +193,16 @@ public class PDFHandler {
             ct.setSimpleColumn(rect);
             ct.addElement(new Paragraph(p));
             ct.go();
-           document.add(new Paragraph("hi"));
+           document.add(new Paragraph("THIS IS YOUR CURRENT BILL STATEMENT WITH DUE DATE ON AUG 20, 2017"));
             
             document.close();
-
-            System.out.println("Done");
+            LOGGER.info("It's Done PDF Bill Generated !!!");
             return true;
         } catch (DocumentException e) {
-            e.printStackTrace();
+        	   	LOGGER.warning("DOCUMENT EXCEPTION : "+e.getMessage());
+        	   	e.printStackTrace();
         } catch (IOException e) {
+        		LOGGER.warning("IO EXCEPTION : "+e.getMessage());
             e.printStackTrace();
         }
 		return false;
