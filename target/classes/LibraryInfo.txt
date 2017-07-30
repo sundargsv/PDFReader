@@ -1,0 +1,6 @@
+Rectangle co-ordinates
+
+lower left X
+lower left Y
+upper right X
+upper right Y
