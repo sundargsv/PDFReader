@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -78,48 +79,46 @@ public class PDFHandler {
 						pdfReader = new PdfReader(dirPath+"/"+file);	
 						pageContent = 
 							  	PdfTextExtractor.getTextFromPage(pdfReader, 1);
-						
-						String s1[]=pageContent.split("\n"); 
+						String[] lines =  pageContent.split("\n");
+						StringBuilder message = new StringBuilder();
+						message.append("Hi my billing account number is ");
 						LOGGER.info("CONTENTS :");
-						for (int i = 0; i < s1.length; i++) {
-							if(i == 0 || i == 1 || i == 9) {
-								System.out.println(s1[i]);
-								System.out.println("\n");	
-							}
-							
-						}
-						/*long pages = pdfReader.getNumberOfPages();
-						for(int i = 1; i <= pages; i++) {
-							if(i == 1) {
-								pageContent = 
-									  	PdfTextExtractor.getTextFromPage(pdfReader, i, strategy);
-									  //System.out.println("Content on Page "+ i + ": " + pageContent);
-									  
-									  /*
-									   * Send JSON
-									   * BAN : "123456789"
-									   * billAmount : "100.50$"
-									   * billDate : "Apr "
-									   * query : "why my bill amount is 5.50 $ extra ?"
-									   * obj.toJSONString()
-									   *  /
-									  
-									  String arr[] = pageContent.split(" : ", 10);
-									  JSONObject obj = new JSONObject();
-									  obj.put("billingAccountNumber", arr[1]);
-									  obj.put("billAmount", "100.50");
-									  obj.put("billDate", new Date());
-									  obj.put("query", "why my bill amount is 5.50$ extra");
-									  
-								
-									  @SuppressWarnings("unused")
-									String res = PDFHandler.requestHandler(obj);
-									  
-							}else {
+						JSONObject request = new JSONObject();
+						for (int i = 0; i < lines.length; i++) {
+							/*
+							   * Send JSON
+							   * { contextTag : ""
+							   * query : "Hi my billing account number is 458281644 and can you tell me why my bill amount has increased ?"
+							   * }
+							   * obj.toJSONString() 
+							   * */
+							if(lines[i].contains("Account Number")){
+								String[] tokenize = lines[i].split(" ");
+								message.append(tokenize[2]);
 								break;
+								
 							}
-					      }*/
-					
+							/*else if(lines[i].contains("Bill Date")){
+								String[] tokenize = lines[i].split(": ");
+
+							}
+							else if(lines[i].contains("Hello,")){
+								String[] tokenize = lines[i].split(", ", 2);
+								System.out.println(tokenize[1]);
+							}else if(lines[i].contains("Total Amount Due")){
+								String[] tokenize = lines[i].split(" ");
+								request.put("billAmount", tokenize[3].substring(1));
+							}else{
+								continue;
+							}*/
+		
+						}
+						message.append(" and can you tell me why my bill amount has increased ?");
+						request.put("contextTag", "no");
+						request.put("message", message.toString());
+						System.out.println(request.toJSONString());
+						@SuppressWarnings("unused")
+						String res = PDFHandler.requestHandler(request);
 				
 				   pdfReader.close();
 				 } catch (IOException e) {

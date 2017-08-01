@@ -24,7 +24,8 @@ public class Application {
 		System.out.println(" Application started to read PDF ");
 	
 		PDFHandler pdfReader = new PDFHandler();
-		String result = pdfReader.contentExtractor("/Users/mopus/Documents/pdfs");
+		/*String result = pdfReader.contentExtractor("/Users/mopus/Documents/pdfs");*/
+		String result = pdfReader.contentExtractor("/home/sundar/My-Projects/pdfs");
 //		System.out.println(pdfReader.pdfWriter());
 
 	}

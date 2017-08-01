@@ -1,3 +1,7 @@
 */target/*
 /bin
-/target/
+*target
+/.git
+*.git
+*.settings
+/.settings
