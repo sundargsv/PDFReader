@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Date;
 import java.util.logging.Logger;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -68,40 +69,56 @@ public class PDFHandler {
 				 try {
 					 	/*
 					 	 *Create PdfReader instance.
-					 	 * Get the number of pages in pdf.
-					 	 * Iterate the pdf through pages.
+					 	 * Get the number of pages in PDF.
+					 	 * Iterate the PDF through pages.
 					 	 * Extract the page content using PdfTextExtractor
 					 	 * Print the page content on console.
 					 	 * */
 						
 						pdfReader = new PdfReader(dirPath+"/"+file);	
+						pageContent = 
+							  	PdfTextExtractor.getTextFromPage(pdfReader, 1);
 						
-						long pages = pdfReader.getNumberOfPages();
-						
-						for(int i = 1; i <= pages; i++) { 
-						  pageContent = 
-						  	PdfTextExtractor.getTextFromPage(pdfReader, i, strategy);
-						  //System.out.println("Content on Page "+ i + ": " + pageContent);
-						  
-						  /*
-						   * Send Json
-						   * BAN : "123456789"
-						   * billAmount : "100.50$"
-						   * query : "why my bill amount is 5.50 $ extra ?"
-						   * obj.toJSONString()
-						   *  */
-						  
-						  String arr[] = pageContent.split(" : ", 10);
-						  JSONObject obj = new JSONObject();
-						  obj.put("billingAccountNumber", arr[1]);
-						  obj.put("billAmount", "100.50");
-						  obj.put("query", "why my bill amount is 5.50 $ extra");
-						  
-					
-						  @SuppressWarnings("unused")
-						String res = PDFHandler.requestHandler(obj);
-						  
-					      }
+						String s1[]=pageContent.split("\n"); 
+						LOGGER.info("CONTENTS :");
+						for (int i = 0; i < s1.length; i++) {
+							if(i == 0 || i == 1 || i == 9) {
+								System.out.println(s1[i]);
+								System.out.println("\n");	
+							}
+							
+						}
+						/*long pages = pdfReader.getNumberOfPages();
+						for(int i = 1; i <= pages; i++) {
+							if(i == 1) {
+								pageContent = 
+									  	PdfTextExtractor.getTextFromPage(pdfReader, i, strategy);
+									  //System.out.println("Content on Page "+ i + ": " + pageContent);
+									  
+									  /*
+									   * Send JSON
+									   * BAN : "123456789"
+									   * billAmount : "100.50$"
+									   * billDate : "Apr "
+									   * query : "why my bill amount is 5.50 $ extra ?"
+									   * obj.toJSONString()
+									   *  /
+									  
+									  String arr[] = pageContent.split(" : ", 10);
+									  JSONObject obj = new JSONObject();
+									  obj.put("billingAccountNumber", arr[1]);
+									  obj.put("billAmount", "100.50");
+									  obj.put("billDate", new Date());
+									  obj.put("query", "why my bill amount is 5.50$ extra");
+									  
+								
+									  @SuppressWarnings("unused")
+									String res = PDFHandler.requestHandler(obj);
+									  
+							}else {
+								break;
+							}
+					      }*/
 					
 				
 				   pdfReader.close();

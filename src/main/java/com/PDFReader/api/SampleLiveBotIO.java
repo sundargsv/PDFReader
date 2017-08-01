@@ -22,7 +22,7 @@ public class SampleLiveBotIO {
 		 * **/
 		@RequestMapping("/APICheker")
 		public String welcome() {
-			return "Bingo, Initiate the call now !!";
+			return "Bingo, Initiate the API call now !!";
 		}
 	
 		/* 
