@@ -21,6 +21,12 @@ public class MessageTemplate {
 	public void setMessage(String message) {
 		this.message = message;
 	}
+	@Override
+	public String toString() {
+		return "MessageTemplate [contextTag=" + contextTag + ", message=" + message + "]";
+	}
+	
+	
 	
 	
 	

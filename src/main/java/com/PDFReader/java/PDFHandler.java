@@ -17,6 +17,8 @@ import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.PdfTextExtractor;
+import com.PDFReader.models.MessageTemplate;
+import com.google.gson.Gson;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -30,12 +32,16 @@ import java.io.IOException;
 public class PDFHandler {
 
 	private static final Logger LOGGER = Logger.getLogger(PDFHandler.class.getName());
-	private static PdfReader pdfReader;
+	private static PdfReader PDFREADER;
+	private static Gson GSON;
+	private MessageTemplate MESSAGETEMPLATE;
+
 	
 	public PDFHandler() {
 		super();
 		Logger.getLogger(PDFHandler.class.getName());
-		
+		GSON = new Gson();
+		MESSAGETEMPLATE = null;
 	}
 
 	/*
@@ -43,16 +49,11 @@ public class PDFHandler {
 	 * @Resolved : Response
 	 * */
 	@SuppressWarnings("unchecked")
-	public String contentExtractor(String dirPath){
+	public MessageTemplate contentExtractor(String dirPath, String API_URL_PATH, String fileName){
 		
-		String pageContent;
-		File dir = new File(dirPath);
-		String[] files = dir.list();
-		 
-		LOGGER.info("No of files :" + files.length);
-		if(files.length != 0){
-			
-			 for (String file : files) {
+		String pageContent = null;
+		
+		if(fileName != null){
 				 
 				 try {
 					 	/*
@@ -63,14 +64,13 @@ public class PDFHandler {
 					 	 * Print the page content on console.
 					 	 * */
 						
-						pdfReader = new PdfReader(dirPath+"/"+file);	
+						PDFREADER = new PdfReader(dirPath+"/"+fileName+".pdf");	
 						pageContent = 
-							  	PdfTextExtractor.getTextFromPage(pdfReader, 1);
+							  	PdfTextExtractor.getTextFromPage(PDFREADER, 1);
 						String[] lines =  pageContent.split("\n");
 						StringBuilder message = new StringBuilder();
 						message.append("Hi my billing account number is ");
-						LOGGER.info("CONTENTS :");
-						JSONObject request = new JSONObject();
+						
 						for (int i = 0; i < lines.length; i++) {
 							/*
 							   * Send JSON
@@ -101,25 +101,35 @@ public class PDFHandler {
 		
 						}
 						message.append(" and can you tell me why my bill amount has increased ?");
+						JSONObject request = new JSONObject();
 						request.put("contextTag", "no");
 						request.put("message", message.toString());
 						System.out.println(request.toJSONString());
-						@SuppressWarnings("unused")
-						String res = PDFHandler.requestHandler(request);
-				
-				   pdfReader.close();
+						
+						String result  = PDFHandler.requestHandler(request, API_URL_PATH);
+						/*LOGGER.info("My JSONSTRING :" +result);*/
+						MESSAGETEMPLATE = new MessageTemplate();
+						MESSAGETEMPLATE = GSON.fromJson(result, MessageTemplate.class);
+						LOGGER.info(MESSAGETEMPLATE.toString());
+						
+				   PDFREADER.close();
+				   
 				 } catch (IOException e) {
-					 LOGGER.warning("IO 	EXCEPTION : "+e.getMessage());
+					 LOGGER.warning("IO EXCEPTION : "+e.getMessage());
 					 e.printStackTrace();
+					 MESSAGETEMPLATE.setContextTag("");
+					 MESSAGETEMPLATE.setMessage("Sorry, There was an internal server error. Please try again later or contact your admin");
 				 }catch (Exception e) {
 					 LOGGER.severe("EXCEPTION : "+e.getMessage());
 					 e.printStackTrace();
+					 MESSAGETEMPLATE.setContextTag("");
+					 MESSAGETEMPLATE.setMessage("Sorry, There was an internal server error. Please try again later or contact your admin");
 				 }
-			 }
+			 
 		
 		}
 		
-		return "Query Responded !!!";
+		return MESSAGETEMPLATE;
 			
 	}
 	
@@ -128,11 +138,12 @@ public class PDFHandler {
 	 * @Resolved : Response
 	 * */
 	
-	public static String requestHandler(JSONObject jsonObject) {
-		String output = "";
+	public static String requestHandler(JSONObject jsonObject, String API_URL_PATH) {
+		String output;
+		
 		 try {
 
-				URL url = new URL("http://localhost:8080/PDFReader-app/respondQuery");
+				URL url = new URL(API_URL_PATH);
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 				conn.setDoOutput(true);
 				conn.setRequestMethod("POST");
@@ -152,11 +163,11 @@ public class PDFHandler {
 
 				
 				System.out.println("Please wait for a while, we are trying to respond you soon .... \n");
-				while ((output = br.readLine()) != null) {
-					System.out.println(output);
-				}
+				output = br.readLine();
+				
 				conn.disconnect();
-
+				
+				return output;
 			  } catch (MalformedURLException e) {
 				 LOGGER.warning("MAL FORMED URL EXCEPTION : "+e.getMessage()); 
 				 e.printStackTrace();
@@ -167,7 +178,8 @@ public class PDFHandler {
 
 			 }
 		 
-		 	return output;
+		 	return null;
+		 	
 	}
 	
 	/*
