@@ -1,5 +1,10 @@
 package com.PDFReader.models;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Scope(value = "request")
+@Component
 public class MessageTemplate {
 
 	private String contextTag;

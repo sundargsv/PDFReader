@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.Date;
-import java.util.List;
 import java.util.logging.Logger;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -22,15 +20,8 @@ import com.itextpdf.text.pdf.parser.PdfTextExtractor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.parser.FilteredTextRenderListener;
-import com.itextpdf.text.pdf.parser.LocationTextExtractionStrategy;
-import com.itextpdf.text.pdf.parser.RegionTextRenderFilter;
-import com.itextpdf.text.pdf.parser.RenderFilter;
-import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
-import com.itextpdf.text.pdf.parser.TextRenderInfo;
 import com.itextpdf.text.pdf.PdfWriter;
 
 
@@ -141,7 +132,7 @@ public class PDFHandler {
 		String output = "";
 		 try {
 
-				URL url = new URL("http://localhost:8080/respondQuery");
+				URL url = new URL("http://localhost:8080/PDFReader-app/respondQuery");
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 				conn.setDoOutput(true);
 				conn.setRequestMethod("POST");
