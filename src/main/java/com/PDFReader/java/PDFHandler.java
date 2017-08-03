@@ -57,11 +57,7 @@ public class PDFHandler {
 		String pageContent;
 		File dir = new File(dirPath);
 		String[] files = dir.list();
-		 Rectangle rect = new Rectangle(36, 36, 300, 500);
-	        RenderFilter regionFilter = new RegionTextRenderFilter(rect);
-	        /*FontRenderFilter fontFilter = new FontRenderFilter();*/
-	        TextExtractionStrategy strategy = new FilteredTextRenderListener(
-	                new LocationTextExtractionStrategy(), regionFilter);
+		 
 		LOGGER.info("No of files :" + files.length);
 		if(files.length != 0){
 			

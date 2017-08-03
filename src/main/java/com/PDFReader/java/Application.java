@@ -6,6 +6,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 @SpringBootApplication
 @ComponentScan("com.PDFReader.api")
 public class Application {
@@ -23,10 +28,34 @@ public class Application {
 		ApplicationContext ctx = SpringApplication.run(Application.class, args);
 		System.out.println(" Application started to read PDF ");
 	
+		
+		/*
+		 * Load the property file
+		 * Get the Property value of 
+		 * 
+		 * **/
+		
+		Properties prop = new Properties();
+		InputStream input = null;
 		PDFHandler pdfReader = new PDFHandler();
-		/*String result = pdfReader.contentExtractor("/Users/mopus/Documents/pdfs");*/
-		String result = pdfReader.contentExtractor("/home/sundar/My-Projects/pdfs");
-//		System.out.println(pdfReader.pdfWriter());
+		try {
+
+			input = new FileInputStream("config.properties");
+			prop.load(input);
+			String result = pdfReader.contentExtractor(prop.getProperty("com.PDFReader.directory.src"));
+
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 
 	}
 

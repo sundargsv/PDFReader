@@ -5,7 +5,16 @@ lower left Y
 upper right X
 upper right Y
 
-Account Number: 458281644 Page: 1 of 4
-Bill Date: Apr. 28, 2017
-Hello, TATIA ALFORD
-Total Amount Due $109.83
+Rectangle rect = new Rectangle(36, 36, 300, 500);
+RenderFilter regionFilter = new RegionTextRenderFilter(rect);
+/*FontRenderFilter fontFilter = new FontRenderFilter();*/
+TextExtractionStrategy strategy = new FilteredTextRenderListener
+new LocationTextExtractionStrategy(), regionFilter);
+
+
+My SRC directory path from office machine -> /home/sundar/My-Projects/pdfs
+
+
+To write a PDF file use this
+
+(pdfReader.pdfWriter())
